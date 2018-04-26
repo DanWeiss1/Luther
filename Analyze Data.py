@@ -17,8 +17,8 @@ print(df.columns)
 # in x keep only numeric variables and add polynomials
 df['post2'] = df['postLength'] ** 2
 df['post3'] = df['postLength'] ** 3
-df['pic2'] = df['pics'] ** 2
-df['pics3'] = df['pics'] ** 3
+df['pics2'] = df['num_pics'] ** 2
+df['pics3'] = df['num_pics'] ** 3
 
 X = df.drop(['attributes', 'location', 'numPics', 'price', 'text', 'title', 'url',
              'textCleaner', 'size', 'model', 'stringUpper', 'logPrice', 'manufacturer'], axis=1)
@@ -60,6 +60,7 @@ def run_model(model_columns, x, y):
                                                                           random_state=42)
 
     ols = LinearRegression()
+    cv_arr = cross_val_score(ols, ind_vars_train, dep_train, cv=5)
     print(cross_val_score(ols, ind_vars_train, dep_train, cv=5))
 
     ols.fit(ind_vars_train, dep_train)
@@ -77,8 +78,8 @@ def run_model(model_columns, x, y):
     d['intercept'] = ols.intercept_
     d['R2 train'] = ols.score(ind_vars_train, dep_train)
     d['R2 test'] = ols.score(ind_vars_test, dep_test)
-    d['RMSE train manual'] = np.sqrt(np.mean((ols.predict(ind_vars_train) - dep_train) ** 2))
-    d['RMSE test manual'] = np.sqrt(np.mean((ols.predict(ind_vars_test) - dep_test) ** 2))
+    d['RMSE train'] = np.sqrt(np.mean((10**ols.predict(ind_vars_train) - 10**dep_train) ** 2))
+    d['RMSE test'] = np.sqrt(np.mean((10**ols.predict(ind_vars_test) - 10**dep_test) ** 2))
     pprint.pprint(d)
     x_train = sm.add_constant(ind_vars_train)
     results = sm.OLS(dep_train, x_train).fit()
@@ -126,3 +127,7 @@ model8_columns = ['ebike', 'kids', 'pro', 'med', 'entry', 'num_pics', 'postLengt
                   'condition_excellent', 'condition_fair', 'condition_good', 'condition_like_new',
                   'condition_new']
 model8_results = run_model(model8_columns, X, y)
+
+# Model 5 returns best Cross Validated Results
+
+pprint.pprint(model5_results)
